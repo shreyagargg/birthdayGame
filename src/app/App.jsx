@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { GameContext } from '../shared/GameContext';
 import { DEFAULT_CONFIG, DEFAULT_NOTES } from '../shared/gameConfig';
 import { audio } from '../services/audioService';
-import { GameCanvas } from '../features/game/components/GameCanvas';
-import { LevelTwoQuiz } from '../features/quiz/components/LevelTwoQuiz';
-import { HUDOverlay, DialogueBox, HomeScreen, RevealSequence } from '../features/story/components/StoryScreens';
-import { EndingOverlay, NextChapterPreview } from '../features/story/components/EndingScreens';
-import { JournalModal, HowToPlayModal, PauseModal } from '../features/story/components/UtilityModals';
-import { ConfigModal } from '../features/settings/components/ConfigModal';
+import { GameCanvas } from '../features/game/GameCanvas';
+import { LevelTwoQuiz } from '../features/quiz/LevelTwoQuiz';
+import { HUDOverlay, DialogueBox, HomeScreen, RevealSequence } from '../features/story/StoryScreens';
+import { EndingOverlay, NextChapterPreview } from '../features/story/EndingScreens';
+import { JournalModal, HowToPlayModal, PauseModal } from '../features/story/UtilityModals';
 
 const safeStorage = {
   get(key) {
@@ -44,7 +43,6 @@ function readNotes(raw) {
 function App() {
   const [config, setConfig] = useState(() => readConfig(safeStorage.get('fairytale_react_cfg')));
   const [notes, setNotes] = useState(() => readNotes(safeStorage.get('fairytale_react_notes')));
-
   const [gameState, setGameState] = useState('HOME');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [collectedEnvelopes, setCollectedEnvelopes] = useState([]);
@@ -53,18 +51,17 @@ function App() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizFeedback, setQuizFeedback] = useState("");
   const [quizComplete, setQuizComplete] = useState(false);
-
   const [showJournal, setShowJournal] = useState(false);
   const [showHowTo, setShowHowTo] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [dialogue, setDialogue] = useState(null);
 
   useEffect(() => {
-    try { safeStorage.set('fairytale_react_cfg', JSON.stringify(config)); } catch (e) {}
+    safeStorage.set('fairytale_react_cfg', JSON.stringify(config));
   }, [config]);
 
   useEffect(() => {
-    try { safeStorage.set('fairytale_react_notes', JSON.stringify(notes)); } catch (e) {}
+    safeStorage.set('fairytale_react_notes', JSON.stringify(notes));
   }, [notes]);
 
   useEffect(() => {
@@ -79,14 +76,14 @@ function App() {
           setCurrentLevel(parsed.level);
         }
       }
-    } catch (e) {}
+    } catch (e) { /* Ignore malformed or unavailable saved progress and start with defaults. */ }
   }, []);
 
-  const saveProgress = (level, collected) => {
-    try { safeStorage.set('fairytale_react_save', JSON.stringify({ level, collected })); } catch (e) {}
-  };
+  const saveProgress = useCallback((level, collected) => {
+    safeStorage.set('fairytale_react_save', JSON.stringify({ level, collected }));
+  }, []);
 
-  const collectEnvelope = (lvlNum) => {
+  const collectEnvelope = useCallback((lvlNum) => {
     if (!collectedEnvelopes.includes(lvlNum)) {
       const next = [...collectedEnvelopes, lvlNum];
       setCollectedEnvelopes(next);
@@ -99,9 +96,9 @@ function App() {
         audio.playGateSFX();
       }
     }
-  };
+  }, [collectedEnvelopes, currentLevel, saveProgress]);
 
-  const resetProgress = () => {
+  const resetProgress = useCallback(() => {
     setCollectedEnvelopes([]);
     setCurrentLevel(1);
     setQuizIndex(0);
@@ -111,36 +108,43 @@ function App() {
     setGameState('HOME');
     setIsPaused(false);
     setShowJournal(false);
-  };
+  }, [saveProgress]);
 
-  const toggleAudio = () => {
+  const toggleAudio = useCallback(() => {
     const muted = audio.toggleMute();
     setIsMuted(muted);
-  };
+  }, []);
 
-  const triggerDialogue = (text) => {
+  const triggerDialogue = useCallback((text) => {
     setDialogue(text);
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    config, setConfig,
+    notes, setNotes,
+    gameState, setGameState,
+    currentLevel, setCurrentLevel,
+    collectedEnvelopes, setCollectedEnvelopes,
+    collectEnvelope,
+    isPaused, setIsPaused,
+    isMuted, toggleAudio,
+    quizIndex, setQuizIndex,
+    quizFeedback, setQuizFeedback,
+    quizComplete, setQuizComplete,
+    showJournal, setShowJournal,
+    showHowTo, setShowHowTo,
+    showConfig, setShowConfig,
+    dialogue, setDialogue, triggerDialogue,
+    resetProgress, saveProgress
+  }), [
+    config, notes, gameState, currentLevel, collectedEnvelopes, collectEnvelope,
+    isPaused, isMuted, toggleAudio, quizIndex, quizFeedback, quizComplete,
+    showJournal, showHowTo, showConfig, dialogue, triggerDialogue, resetProgress,
+    saveProgress
+  ]);
 
   return (
-    <GameContext.Provider value={{
-      config, setConfig,
-      notes, setNotes,
-      gameState, setGameState,
-      currentLevel, setCurrentLevel,
-      collectedEnvelopes, setCollectedEnvelopes,
-      collectEnvelope,
-      isPaused, setIsPaused,
-      isMuted, toggleAudio,
-      quizIndex, setQuizIndex,
-      quizFeedback, setQuizFeedback,
-      quizComplete, setQuizComplete,
-      showJournal, setShowJournal,
-      showHowTo, setShowHowTo,
-      showConfig, setShowConfig,
-      dialogue, setDialogue, triggerDialogue,
-      resetProgress, saveProgress
-    }}>
+    <GameContext.Provider value={contextValue}>
       <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center font-sans text-slate-100 overflow-hidden select-none">
         <div className="relative w-full h-full max-w-6xl max-h-[800px] flex items-center justify-center overflow-hidden md:rounded-2xl border-0 md:border border-amber-500/20 shadow-2xl bg-slate-950">
 
@@ -155,7 +159,6 @@ function App() {
           {showJournal && <JournalModal />}
           {showHowTo && <HowToPlayModal />}
           {isPaused && <PauseModal />}
-          {showConfig && <ConfigModal />}
           {gameState === 'REVEAL' && <RevealSequence />}
           {gameState === 'ENDING' && <EndingOverlay />}
           {gameState === 'PREVIEW' && <NextChapterPreview />}

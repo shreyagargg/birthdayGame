@@ -1,8 +1,5 @@
-import { useState, useEffect, useRef, useContext } from 'react';
-import { Heart, Volume2, VolumeX, BookOpen, Pause, RotateCcw, ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
-import { GameContext } from '../../../shared/GameContext';
-import { audio } from '../../../services/audioService';
-import { DEFAULT_CONFIG, DEFAULT_NOTES } from '../../../shared/gameConfig';
+import { useContext } from 'react';
+import { GameContext } from '../../shared/GameContext';
 
 export function JournalModal() {
   const { collectedEnvelopes, gameState, notes, setShowJournal } = useContext(GameContext);

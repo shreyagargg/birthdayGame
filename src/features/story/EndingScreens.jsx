@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef, useContext } from 'react';
-import { Heart, Volume2, VolumeX, BookOpen, Pause, RotateCcw, ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
-import { GameContext } from '../../../shared/GameContext';
-import { audio } from '../../../services/audioService';
-import { DEFAULT_CONFIG, DEFAULT_NOTES } from '../../../shared/gameConfig';
+import {  useContext } from 'react';
+import { Heart, RotateCcw, ChevronLeft } from 'lucide-react';
+import { GameContext } from '../../shared/GameContext';
 
 export function EndingOverlay() {
   const { config, setGameState, resetProgress } = useContext(GameContext);
@@ -20,7 +18,7 @@ export function EndingOverlay() {
         <h2 className="text-3xl font-bold font-serif text-amber-300">Our Fairytale Begins</h2>
 
         <div className="bg-[#faf6ed] text-[#4a3525] border-2 border-amber-500 p-6 rounded-2xl w-full text-left font-serif text-base md:text-lg leading-relaxed shadow-xl whitespace-pre-line">
-          {config.dedicationText.replace(/\[SPECIAL NICKNAME\]/g, config.recipientNickname)}
+          {config.dedicationText.replaceAll('[SPECIAL NICKNAME]', config.recipientNickname)}
         </div>
 
         <div className="flex flex-col w-full space-y-3 pt-2">

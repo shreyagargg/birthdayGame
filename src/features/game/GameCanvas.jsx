@@ -1,6 +1,9 @@
-import { useEffect, useRef, useContext } from 'react';
-import { GameContext } from '../../../shared/GameContext';
-import { audio } from '../../../services/audioService';
+import { useEffect, useRef, useContext, useState } from 'react';
+import { GameContext } from '../../shared/GameContext';
+import { audio } from '../../services/audioService';
+import { Level1Puzzle } from './Level1Puzzle';
+
+const PERSONAL_BACKGROUND_URL = "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80";
 
 export function GameCanvas() {
   const {
@@ -13,7 +16,24 @@ export function GameCanvas() {
   const danceTransitionScheduled = useRef(false);
   const gridMoveHeld = useRef(false);
 
-  // Level 5 maze: 9 columns x 6 rows. 1 = blocked, 0 = walkable.
+  // Dedicated Level 1 Puzzle state
+  const [showLevel1Puzzle, setShowLevel1Puzzle] = useState(false);
+
+  // Background Image Ref
+  const bgImageRef = useRef(null);
+  const bgLoaded = useRef(false);
+
+  // Confetti particles for the end dance state
+  const confettiList = useRef([]);
+
+  useEffect(() => {
+    const bgImg = new Image();
+    bgImg.crossOrigin = "anonymous";
+    bgImg.src = PERSONAL_BACKGROUND_URL;
+    bgImg.onload = () => { bgLoaded.current = true; };
+    bgImageRef.current = bgImg;
+  }, []);
+
   const maze = [
     [0, 0, 1, 0, 0, 0, 0, 0, 0],
     [1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -29,7 +49,7 @@ export function GameCanvas() {
     isGrounded: false, facing: 'right', animFrame: 0, animTimer: 0
   });
 
-  const princess = useRef({ x: 830, y: 48, width: 30, height: 46 });
+  const princess = useRef({ x: 780, y: 450, width: 30, height: 46 });
 
   const crystals = useRef([
     { x: 250, y: 380, active: false },
@@ -37,7 +57,6 @@ export function GameCanvas() {
     { x: 650, y: 380, active: false }
   ]);
 
-  // Levels live in a ref so moving platforms keep their position between renders
   const levels = useRef({
     1: {
       name: "The Whispering Forest",
@@ -84,7 +103,7 @@ export function GameCanvas() {
       nextPortal: { x: 860, y: 450, w: 40, h: 70 }
     },
     5: {
-      name: "The Royal Castle Maze",
+      name: "The Special Moment",
       bgColor: "#1c113b",
       platforms: [],
       envelope: { x: 850, y: 50 },
@@ -108,8 +127,30 @@ export function GameCanvas() {
     if (gameState !== 'DANCE') danceTransitionScheduled.current = false;
   }, [currentLevel, gameState]);
 
+  useEffect(() => {
+    if (gameState === 'DANCE') {
+      const colors = ['#f472b6', '#fbbf24', '#38bdf8', '#a855f7', '#4ade80', '#f43f5e'];
+      confettiList.current = Array.from({ length: 90 }, () => ({
+        x: Math.random() * 900,
+        y: Math.random() * -300,
+        w: Math.random() * 8 + 4,
+        h: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedY: Math.random() * 3 + 2,
+        speedX: (Math.random() - 0.5) * 2,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.1
+      }));
+    }
+  }, [gameState]);
+
   const handleInteract = () => {
-    if (currentLevel === 3) {
+    if (currentLevel === 1 && !collectedEnvelopes.includes(1)) {
+      const dist = Math.hypot((player.current.x + 16) - levels[1].envelope.x, (player.current.y + 24) - levels[1].envelope.y);
+      if (dist < 45) {
+        setShowLevel1Puzzle(true);
+      }
+    } else if (currentLevel === 3) {
       let updatedAny = false;
       crystals.current.forEach(c => {
         const dist = Math.hypot((player.current.x + 16) - c.x, (player.current.y + 24) - c.y);
@@ -129,7 +170,7 @@ export function GameCanvas() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (gameState !== 'PLAYING' || isPaused) return;
+      if (gameState !== 'PLAYING' || isPaused || showLevel1Puzzle) return;
       if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
 
       if (currentLevel === 5) {
@@ -157,6 +198,8 @@ export function GameCanvas() {
               const earlierMemoriesCollected = [1, 2, 3, 4].every(id => collectedEnvelopes.includes(id));
               if (earlierMemoriesCollected) {
                 if (!collectedEnvelopes.includes(5)) collectEnvelope(5);
+                player.current.x = 100;
+                player.current.y = 450;
                 setGameState('DANCE');
               } else {
                 triggerDialogue('The royal letter is waiting here, but the prince must collect the first four memories before the reunion can begin.');
@@ -194,11 +237,11 @@ export function GameCanvas() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, currentLevel, collectedEnvelopes, isPaused]);
+  }, [gameState, currentLevel, collectedEnvelopes, isPaused, showLevel1Puzzle]);
 
-  const drawPrince = (ctx, x, y, facing, frame) => {
+  const drawPrince = (ctx, x, y, facing, frame, bounceY = 0) => {
     ctx.save();
-    ctx.translate(x + 16, y + 24);
+    ctx.translate(x + 16, y + 24 + bounceY);
     if (facing === 'left') ctx.scale(-1, 1);
     ctx.fillStyle = "#1e1b4b";
     ctx.fillRect(-10, -10, 20, 24);
@@ -221,9 +264,9 @@ export function GameCanvas() {
     ctx.restore();
   };
 
-  const drawPrincess = (ctx, x, y) => {
+  const drawPrincess = (ctx, x, y, bounceY = 0) => {
     ctx.save();
-    ctx.translate(x + 15, y + 23);
+    ctx.translate(x + 15, y + 23 + bounceY);
     ctx.fillStyle = "#f472b6";
     ctx.beginPath();
     ctx.moveTo(0, -10);
@@ -240,6 +283,20 @@ export function GameCanvas() {
     ctx.fillStyle = "#831843";
     ctx.fillRect(-3, -13, 2, 3);
     ctx.restore();
+  };
+
+  const drawPersonalizedBackground = (ctx) => {
+    if (bgLoaded.current && bgImageRef.current) {
+      ctx.drawImage(bgImageRef.current, 0, 0, 900, 600);
+      ctx.fillStyle = "rgba(15, 23, 42, 0.25)";
+      ctx.fillRect(0, 0, 900, 600);
+    }
+
+    ctx.fillStyle = "rgba(46, 16, 101, 0.85)";
+    ctx.fillRect(0, 500, 900, 100);
+
+    ctx.fillStyle = "#f472b6";
+    ctx.fillRect(0, 500, 900, 4);
   };
 
   useEffect(() => {
@@ -260,7 +317,7 @@ export function GameCanvas() {
       const p = player.current;
       const lvl = levels[currentLevel];
 
-      if (gameState === 'PLAYING' && currentLevel !== 2 && currentLevel !== 5 && !isPaused) {
+      if (gameState === 'PLAYING' && currentLevel !== 2 && currentLevel !== 5 && !isPaused && !showLevel1Puzzle) {
         const speed = 4;
         if (keys.current.left) {
           p.vx = -speed;
@@ -309,16 +366,14 @@ export function GameCanvas() {
         }
 
         const isEnvelopeCollected = collectedEnvelopes.includes(currentLevel);
-        const puzzleLocked = currentLevel === 3 && !crystals.current.every(c => c.active);
 
-        if (lvl.envelope && !isEnvelopeCollected && !puzzleLocked) {
+        if (currentLevel !== 1 && lvl.envelope && !isEnvelopeCollected && currentLevel !== 3) {
           const dist = Math.hypot((p.x + 16) - lvl.envelope.x, (p.y + 24) - lvl.envelope.y);
           if (dist < 35) {
             collectEnvelope(currentLevel);
           }
         }
 
-        // Check portal transition constraint
         if (lvl.nextPortal) {
           const port = lvl.nextPortal;
           const touchingPortal = p.x + p.width > port.x && p.x < port.x + port.w && p.y + p.height > port.y;
@@ -347,7 +402,6 @@ export function GameCanvas() {
         }
       }
 
-      // ---------- DRAWING ----------
       ctx.fillStyle = lvl.bgColor;
       ctx.fillRect(0, 0, 900, 600);
 
@@ -373,7 +427,7 @@ export function GameCanvas() {
       ctx.fillText(lvl.name.toUpperCase(), 450, 80);
       ctx.textAlign = "left";
 
-      if (currentLevel === 5) {
+      if (currentLevel === 5 && gameState === 'PLAYING') {
         const cell = 100;
         for (let row = 0; row < 6; row++) {
           for (let col = 0; col < 9; col++) {
@@ -398,6 +452,11 @@ export function GameCanvas() {
         ctx.beginPath();
         ctx.arc(850, 75, 15, 0, Math.PI * 2);
         ctx.fill();
+        drawPrincess(ctx, 830, 48);
+      }
+
+      if (gameState === 'DANCE') {
+        drawPersonalizedBackground(ctx);
       }
 
       if (currentLevel !== 5) lvl.platforms.forEach(plat => {
@@ -416,13 +475,6 @@ export function GameCanvas() {
           ctx.strokeStyle = "#e0f2fe";
           ctx.stroke();
         });
-      }
-
-      if (currentLevel === 5) {
-        ctx.fillStyle = "rgba(251, 191, 36, 0.25)";
-        ctx.fillRect(800, 0, 100, 100);
-        ctx.strokeStyle = "#fbbf24";
-        ctx.strokeRect(800, 0, 100, 100);
       }
 
       if (lvl.nextPortal) {
@@ -453,25 +505,66 @@ export function GameCanvas() {
         ctx.lineTo(0, 1);
         ctx.lineTo(12, -8);
         ctx.stroke();
+
+        if (currentLevel === 1) {
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("Press E / Tap to Solve Jigsaw", 0, -26);
+        }
+
         ctx.restore();
       }
 
-      if (currentLevel === 5) {
-        drawPrincess(ctx, 830, 48);
+      if (gameState !== 'DANCE') {
+        drawPrince(ctx, p.x, p.y, p.facing, p.animFrame);
       }
 
-      drawPrince(ctx, p.x, p.y, p.facing, p.animFrame);
-
       if (gameState === 'DANCE') {
-        if (p.x < princess.current.x - 45) {
-          p.x += 1.5;
+        const targetX = princess.current.x - 45;
+
+        if (p.x < targetX) {
+          p.x += 2.5;
+          p.facing = 'right';
           p.animFrame = (p.animFrame + 1) % 4;
-        } else if (!danceTransitionScheduled.current) {
-          danceTransitionScheduled.current = true;
-          setTimeout(() => {
-            setGameState('REVEAL');
-          }, 1000);
+          drawPrince(ctx, p.x, 450, p.facing, p.animFrame);
+          drawPrincess(ctx, princess.current.x, 450);
+        } else {
+          const bounceY = Math.abs(Math.sin(Date.now() / 150)) * -12;
+          const princeBounce = Math.abs(Math.cos(Date.now() / 150)) * -12;
+
+          drawPrince(ctx, p.x, 450, 'right', 1, princeBounce);
+          drawPrincess(ctx, princess.current.x, 450, bounceY);
+
+          ctx.fillStyle = "#f43f5e";
+          ctx.font = "20px sans-serif";
+          ctx.fillText("♥", p.x + 20, 420 + Math.sin(Date.now() / 200) * 8);
+
+          if (!danceTransitionScheduled.current) {
+            danceTransitionScheduled.current = true;
+            setTimeout(() => {
+              setGameState('REVEAL');
+            }, 3000);
+          }
         }
+
+        confettiList.current.forEach(c => {
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.rot);
+          ctx.fillStyle = c.color;
+          ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+          ctx.restore();
+
+          c.y += c.speedY;
+          c.x += c.speedX;
+          c.rot += c.rotSpeed;
+
+          if (c.y > 600) {
+            c.y = -20;
+            c.x = Math.random() * 900;
+          }
+        });
       }
 
       animId = requestAnimationFrame(render);
@@ -479,14 +572,29 @@ export function GameCanvas() {
 
     render();
     return () => cancelAnimationFrame(animId);
-  }, [gameState, currentLevel, collectedEnvelopes, isPaused]);
+  }, [gameState, currentLevel, collectedEnvelopes, isPaused, showLevel1Puzzle]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={900}
-      height={600}
-      className="w-full h-full object-contain block bg-slate-950"
-    />
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        width={900}
+        height={600}
+        className="w-full h-full object-contain block bg-slate-950"
+      />
+
+      {/* DEDICATED LEVEL 1 JIGSAW PUZZLE COMPONENT */}
+      {showLevel1Puzzle && (
+        <Level1Puzzle
+          onSolve={() => {
+            audio.playGateSFX();
+            collectEnvelope(1);
+            setShowLevel1Puzzle(false);
+            triggerDialogue("Wonderful! The 16-piece jigsaw memory is restored and Letter 1 is unlocked!");
+          }}
+          onClose={() => setShowLevel1Puzzle(false)}
+        />
+      )}
+    </div>
   );
 }
