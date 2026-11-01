@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; font-synthesis: none; text-rendering: optimizeLegibility; }
+:root { color-scheme: light; font-synthesis: none; text-rendering: optimizeLegibility; }
 html, body, #root { width: 100%; min-width: 320px; min-height: 100%; margin: 0; }
-body { overflow: hidden; background: #020617; }
+body { overflow: hidden; background: #38bdf8; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
 button, input, textarea { font: inherit; }
-button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #f9a8d4; outline-offset: 3px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #f59e0b; outline-offset: 3px; }

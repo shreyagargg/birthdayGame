@@ -3,6 +3,7 @@ import { GameContext } from '../shared/GameContext';
 import { DEFAULT_CONFIG, DEFAULT_NOTES } from '../shared/gameConfig';
 import { audio } from '../services/audioService';
 import { GameCanvas } from '../features/game/GameCanvas';
+import { Level1Puzzle } from '../features/game/Level1Puzzle';
 import { LevelTwoQuiz } from '../features/quiz/LevelTwoQuiz';
 import { HUDOverlay, DialogueBox, HomeScreen, RevealSequence } from '../features/story/StoryScreens';
 import { EndingOverlay, NextChapterPreview } from '../features/story/EndingScreens';
@@ -145,25 +146,22 @@ function App() {
 
   return (
     <GameContext.Provider value={contextValue}>
-      <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center font-sans text-slate-100 overflow-hidden select-none">
-        <div className="relative w-full h-full max-w-6xl max-h-[800px] flex items-center justify-center overflow-hidden md:rounded-2xl border-0 md:border border-amber-500/20 shadow-2xl bg-slate-950">
+      <div className="relative w-screen h-screen overflow-hidden select-none font-sans bg-sky-400">
+        <GameCanvas />
 
-          <GameCanvas />
+        {gameState === 'PLAYING' && <HUDOverlay />}
+        {gameState === 'PLAYING' && currentLevel === 1 && <Level1Puzzle />}
+        {gameState === 'PLAYING' && currentLevel === 2 && <LevelTwoQuiz />}
 
-          {gameState === 'PLAYING' && <HUDOverlay />}
-          {gameState === 'PLAYING' && currentLevel === 2 && <LevelTwoQuiz />}
+        {dialogue && <DialogueBox text={dialogue} onClose={() => setDialogue(null)} />}
 
-          {dialogue && <DialogueBox text={dialogue} onClose={() => setDialogue(null)} />}
-
-          {gameState === 'HOME' && <HomeScreen />}
-          {showJournal && <JournalModal />}
-          {showHowTo && <HowToPlayModal />}
-          {isPaused && <PauseModal />}
-          {gameState === 'REVEAL' && <RevealSequence />}
-          {gameState === 'ENDING' && <EndingOverlay />}
-          {gameState === 'PREVIEW' && <NextChapterPreview />}
-
-        </div>
+        {gameState === 'HOME' && <HomeScreen />}
+        {showJournal && <JournalModal />}
+        {showHowTo && <HowToPlayModal />}
+        {isPaused && <PauseModal />}
+        {gameState === 'REVEAL' && <RevealSequence />}
+        {gameState === 'ENDING' && <EndingOverlay />}
+        {gameState === 'PREVIEW' && <NextChapterPreview />}
       </div>
     </GameContext.Provider>
   );

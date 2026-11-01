@@ -1,9 +1,8 @@
-import { useEffect, useRef, useContext, useState } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 import { GameContext } from '../../shared/GameContext';
 import { audio } from '../../services/audioService';
-import { Level1Puzzle } from './Level1Puzzle';
 
-const PERSONAL_BACKGROUND_URL = "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80";
+const PERSONAL_BACKGROUND_URL = "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=900&q=80";
 
 export function GameCanvas() {
   const {
@@ -16,14 +15,11 @@ export function GameCanvas() {
   const danceTransitionScheduled = useRef(false);
   const gridMoveHeld = useRef(false);
 
-  // Dedicated Level 1 Puzzle state
-  const [showLevel1Puzzle, setShowLevel1Puzzle] = useState(false);
-
   // Background Image Ref
   const bgImageRef = useRef(null);
   const bgLoaded = useRef(false);
 
-  // Confetti particles for the end dance state
+  // Confetti & Petals for the celebration
   const confettiList = useRef([]);
 
   useEffect(() => {
@@ -51,35 +47,34 @@ export function GameCanvas() {
 
   const princess = useRef({ x: 780, y: 450, width: 30, height: 46 });
 
-  const crystals = useRef([
-    { x: 250, y: 380, active: false },
-    { x: 450, y: 300, active: false },
-    { x: 650, y: 380, active: false }
+  // Level 3 Enchanted Garden Flowers (Sunflower, Rose, Tulip)
+  const flowers = useRef([
+    { x: 250, y: 380, active: false, name: "Sunflower", petalColor: "#fbbf24", centerColor: "#78350f" },
+    { x: 450, y: 300, active: false, name: "Rose", petalColor: "#f43f5e", centerColor: "#fda4af" },
+    { x: 650, y: 380, active: false, name: "Tulip", petalColor: "#ec4899", centerColor: "#fef08a" }
   ]);
 
   const levels = useRef({
     1: {
-      name: "The Whispering Forest",
-      bgColor: "#091124",
-      platforms: [
-        { x: 0, y: 520, w: 900, h: 80 },
-        { x: 250, y: 430, w: 140, h: 20 },
-        { x: 480, y: 350, w: 140, h: 20 },
-        { x: 700, y: 280, w: 150, h: 20 }
-      ],
-      envelope: { x: 760, y: 235 },
-      nextPortal: { x: 840, y: 450, w: 40, h: 70 }
+      name: "The Sunlit Garden Meadow",
+      skyTop: "#38bdf8",
+      skyBottom: "#fef08a",
+      platforms: [{ x: 0, y: 520, w: 900, h: 80 }],
+      envelope: null,
+      nextPortal: null
     },
     2: {
-      name: "The Moonlit Memories Quiz",
-      bgColor: "#0a1733",
+      name: "The Sunflower Memories Quiz",
+      skyTop: "#60a5fa",
+      skyBottom: "#fef3c7",
       platforms: [{ x: 0, y: 520, w: 900, h: 80 }],
       envelope: null,
       nextPortal: null
     },
     3: {
-      name: "The Crystal Garden",
-      bgColor: "#140e2b",
+      name: "The Blooming Flower Garden",
+      skyTop: "#38bdf8",
+      skyBottom: "#ecfdf5",
       platforms: [
         { x: 0, y: 520, w: 900, h: 80 },
         { x: 200, y: 410, w: 120, h: 20 },
@@ -90,8 +85,9 @@ export function GameCanvas() {
       nextPortal: { x: 840, y: 450, w: 40, h: 70 }
     },
     4: {
-      name: "The Cloud Bridge",
-      bgColor: "#161338",
+      name: "The Sunlit Petal & Rainbow Bridge",
+      skyTop: "#0ea5e9",
+      skyBottom: "#fef9c3",
       platforms: [
         { x: 0, y: 520, w: 180, h: 80 },
         { x: 220, y: 440, w: 110, h: 20, moving: true, range: 100, dir: 1, initialX: 220 },
@@ -103,8 +99,9 @@ export function GameCanvas() {
       nextPortal: { x: 860, y: 450, w: 40, h: 70 }
     },
     5: {
-      name: "The Special Moment",
-      bgColor: "#1c113b",
+      name: "The Royal Rose Garden Maze",
+      skyTop: "#38bdf8",
+      skyBottom: "#fed7aa",
       platforms: [],
       envelope: { x: 850, y: 50 },
       gate: null
@@ -118,59 +115,80 @@ export function GameCanvas() {
       player.current.y = 526;
       player.current.vx = 0;
       player.current.vy = 0;
-    } else if (currentLevel === 2) {
+    } else if (currentLevel === 1 || currentLevel === 2) {
       player.current.x = 40;
-      player.current.y = 400;
+      player.current.y = 472;
       player.current.vx = 0;
       player.current.vy = 0;
+    } else if (currentLevel === 3) {
+      player.current.x = 40;
+      player.current.y = 472;
+      player.current.vx = 0;
+      player.current.vy = 0;
+      if (collectedEnvelopes.includes(3)) {
+        flowers.current.forEach(f => { f.active = true; });
+      }
     }
     if (gameState !== 'DANCE') danceTransitionScheduled.current = false;
-  }, [currentLevel, gameState]);
+  }, [currentLevel, gameState, collectedEnvelopes]);
 
   useEffect(() => {
     if (gameState === 'DANCE') {
-      const colors = ['#f472b6', '#fbbf24', '#38bdf8', '#a855f7', '#4ade80', '#f43f5e'];
+      const colors = ['#f472b6', '#fbbf24', '#38bdf8', '#f43f5e', '#4ade80', '#fb923c', '#ffffff'];
       confettiList.current = Array.from({ length: 90 }, () => ({
         x: Math.random() * 900,
         y: Math.random() * -300,
-        w: Math.random() * 8 + 4,
+        w: Math.random() * 10 + 5,
         h: Math.random() * 8 + 4,
         color: colors[Math.floor(Math.random() * colors.length)],
         speedY: Math.random() * 3 + 2,
-        speedX: (Math.random() - 0.5) * 2,
+        speedX: (Math.random() - 0.5) * 2.5,
         rot: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.1
+        rotSpeed: (Math.random() - 0.5) * 0.12,
+        isPetal: Math.random() > 0.4
       }));
     }
   }, [gameState]);
 
   const handleInteract = () => {
-    if (currentLevel === 1 && !collectedEnvelopes.includes(1)) {
-      const dist = Math.hypot((player.current.x + 16) - levels[1].envelope.x, (player.current.y + 24) - levels[1].envelope.y);
-      if (dist < 45) {
-        setShowLevel1Puzzle(true);
-      }
-    } else if (currentLevel === 3) {
+    if (currentLevel === 3) {
       let updatedAny = false;
-      crystals.current.forEach(c => {
-        const dist = Math.hypot((player.current.x + 16) - c.x, (player.current.y + 24) - c.y);
-        if (dist < 45) {
-          c.active = !c.active;
+      flowers.current.forEach(f => {
+        const dist = Math.hypot((player.current.x + 16) - f.x, (player.current.y + 24) - f.y);
+        if (dist < 60) {
+          f.active = !f.active;
           updatedAny = true;
-          audio.playTone(c.active ? 600 : 300, 'sine', 0.2, 0.1);
+          audio.playTone(f.active ? 660 : 330, 'sine', 0.25, 0.12);
         }
       });
 
-      if (updatedAny && crystals.current.every(c => c.active)) {
-        audio.playGateSFX();
-        triggerDialogue("The crystal flowers illuminate! The memory container has unlocked.");
+      if (updatedAny) {
+        if (flowers.current.every(f => f.active)) {
+          audio.playGateSFX();
+          triggerDialogue("✨ All three magical garden flowers have bloomed in radiant colors! The love letter is unlocked!");
+        }
+        return;
+      }
+
+      // Check if interacting near envelope
+      if (!collectedEnvelopes.includes(3) && levels[3].envelope) {
+        const envDist = Math.hypot((player.current.x + 16) - levels[3].envelope.x, (player.current.y + 24) - levels[3].envelope.y);
+        if (envDist < 60) {
+          if (flowers.current.every(f => f.active)) {
+            collectEnvelope(3);
+          } else {
+            const activeCount = flowers.current.filter(f => f.active).length;
+            audio.playTone(220, 'sine', 0.2, 0.08);
+            triggerDialogue(`This memory envelope is sealed by morning dew! Stand near all 3 garden flowers and press E to bloom them (${activeCount}/3 bloomed). 🌸`);
+          }
+        }
       }
     }
   };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (gameState !== 'PLAYING' || isPaused || showLevel1Puzzle) return;
+      if (gameState !== 'PLAYING' || isPaused || currentLevel === 1 || currentLevel === 2) return;
       if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
 
       if (currentLevel === 5) {
@@ -192,7 +210,11 @@ export function GameCanvas() {
             player.current.y = nextRow * 100 + 26;
             player.current.vx = 0;
             player.current.vy = 0;
-            player.current.facing = direction[0] < 0 ? 'left' : direction[0] > 0 ? 'right' : player.current.facing;
+            if (direction[0] < 0) {
+              player.current.facing = 'left';
+            } else if (direction[0] > 0) {
+              player.current.facing = 'right';
+            }
             audio.playJumpSFX();
             if (nextCol === 8 && nextRow === 0) {
               const earlierMemoriesCollected = [1, 2, 3, 4].every(id => collectedEnvelopes.includes(id));
@@ -202,7 +224,7 @@ export function GameCanvas() {
                 player.current.y = 450;
                 setGameState('DANCE');
               } else {
-                triggerDialogue('The royal letter is waiting here, but the prince must collect the first four memories before the reunion can begin.');
+                triggerDialogue('The Princess is waiting at the sunlit rose pavilion, but the prince must gather the first four garden letters first! 🌸');
               }
             }
           }
@@ -237,66 +259,267 @@ export function GameCanvas() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState, currentLevel, collectedEnvelopes, isPaused, showLevel1Puzzle]);
+  }, [gameState, currentLevel, collectedEnvelopes, isPaused]);
+
+  const handleCanvasClick = (e) => {
+    if (gameState !== 'PLAYING' || isPaused) return;
+    if (currentLevel === 3) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = 900 / rect.width;
+      const scaleY = 600 / rect.height;
+      const clickX = (e.clientX - rect.left) * scaleX;
+      const clickY = (e.clientY - rect.top) * scaleY;
+
+      // Click on or near flower
+      flowers.current.forEach(f => {
+        const clickDist = Math.hypot(clickX - f.x, clickY - f.y);
+        const playerDist = Math.hypot((player.current.x + 16) - f.x, (player.current.y + 24) - f.y);
+        if (clickDist < 45 && playerDist < 95) {
+          f.active = !f.active;
+          audio.playTone(f.active ? 660 : 330, 'sine', 0.25, 0.12);
+          if (flowers.current.every(fl => fl.active)) {
+            audio.playGateSFX();
+            triggerDialogue("✨ All three magical garden flowers have bloomed in radiant colors! The love letter is unlocked!");
+          }
+        }
+      });
+
+      // Click on or near envelope
+      if (levels[3].envelope && !collectedEnvelopes.includes(3)) {
+        const envClickDist = Math.hypot(clickX - levels[3].envelope.x, clickY - levels[3].envelope.y);
+        const envPlayerDist = Math.hypot((player.current.x + 16) - levels[3].envelope.x, (player.current.y + 24) - levels[3].envelope.y);
+        if (envClickDist < 45 && envPlayerDist < 95) {
+          if (flowers.current.every(f => f.active)) {
+            collectEnvelope(3);
+          } else {
+            const activeCount = flowers.current.filter(f => f.active).length;
+            audio.playTone(220, 'sine', 0.2, 0.08);
+            triggerDialogue(`This memory envelope is sealed! Stand near all 3 garden flowers and bloom them (${activeCount}/3 bloomed). 🌸`);
+          }
+        }
+      }
+    }
+  };
 
   const drawPrince = (ctx, x, y, facing, frame, bounceY = 0) => {
     ctx.save();
     ctx.translate(x + 16, y + 24 + bounceY);
     if (facing === 'left') ctx.scale(-1, 1);
-    ctx.fillStyle = "#1e1b4b";
-    ctx.fillRect(-10, -10, 20, 24);
-    ctx.fillStyle = "#be123c";
+
+    // Cape (warm royal rose-gold)
+    ctx.fillStyle = "#e11d48";
     ctx.beginPath();
     ctx.moveTo(-8, -10);
     ctx.lineTo(-16 + (frame * 2), 12);
     ctx.lineTo(-6, 14);
     ctx.fill();
-    ctx.fillStyle = "#fde047";
+
+    // Body (royal blue tunic with gold trim)
+    ctx.fillStyle = "#1e3a8a";
+    ctx.fillRect(-10, -10, 20, 24);
+    ctx.fillStyle = "#f59e0b";
+    ctx.fillRect(-10, 2, 20, 3); // Gold belt
+
+    // Crown (golden flower crown)
+    ctx.fillStyle = "#f59e0b";
     ctx.fillRect(-7, -24, 14, 6);
+    ctx.fillStyle = "#f43f5e";
+    ctx.beginPath();
+    ctx.arc(0, -24, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Head
     ctx.fillStyle = "#fed7aa";
     ctx.fillRect(-8, -18, 16, 10);
     ctx.fillStyle = "#1e293b";
     ctx.fillRect(2, -15, 3, 3);
+
+    // Legs
     ctx.fillStyle = "#0f172a";
     const legOffset = Math.sin(frame * Math.PI / 2) * 4;
     ctx.fillRect(-8, 14, 6, 10 + legOffset);
     ctx.fillRect(2, 14, 6, 10 + legOffset);
+
     ctx.restore();
   };
 
   const drawPrincess = (ctx, x, y, bounceY = 0) => {
     ctx.save();
     ctx.translate(x + 15, y + 23 + bounceY);
-    ctx.fillStyle = "#f472b6";
+
+    // Dress (flowing rose-pink blossom gown)
+    ctx.fillStyle = "#f43f5e";
     ctx.beginPath();
     ctx.moveTo(0, -10);
-    ctx.lineTo(-14, 22);
-    ctx.lineTo(14, 22);
+    ctx.lineTo(-15, 22);
+    ctx.lineTo(15, 22);
     ctx.closePath();
     ctx.fill();
+
+    // Floral lace trim
+    ctx.fillStyle = "#fbcfe8";
+    ctx.beginPath();
+    ctx.arc(-8, 22, 4, 0, Math.PI);
+    ctx.arc(0, 22, 4, 0, Math.PI);
+    ctx.arc(8, 22, 4, 0, Math.PI);
+    ctx.fill();
+
+    // Golden Hair
     ctx.fillStyle = "#fbbf24";
     ctx.beginPath();
     ctx.arc(0, -14, 11, 0, Math.PI * 2);
     ctx.fill();
+
+    // Flower Garland in Hair
+    ctx.fillStyle = "#f472b6";
+    ctx.beginPath();
+    ctx.arc(-5, -20, 2.5, 0, Math.PI * 2);
+    ctx.arc(0, -22, 3, 0, Math.PI * 2);
+    ctx.arc(5, -20, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Face
     ctx.fillStyle = "#fed7aa";
     ctx.fillRect(-6, -16, 12, 10);
     ctx.fillStyle = "#831843";
     ctx.fillRect(-3, -13, 2, 3);
+
     ctx.restore();
   };
 
   const drawPersonalizedBackground = (ctx) => {
     if (bgLoaded.current && bgImageRef.current) {
       ctx.drawImage(bgImageRef.current, 0, 0, 900, 600);
-      ctx.fillStyle = "rgba(15, 23, 42, 0.25)";
+      ctx.fillStyle = "rgba(254, 240, 138, 0.15)";
+      ctx.fillRect(0, 0, 900, 600);
+    } else {
+      // Warm sunlit garden backdrop
+      const grad = ctx.createLinearGradient(0, 0, 0, 600);
+      grad.addColorStop(0, '#38bdf8');
+      grad.addColorStop(0.6, '#fef08a');
+      grad.addColorStop(1, '#22c55e');
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 900, 600);
     }
 
-    ctx.fillStyle = "rgba(46, 16, 101, 0.85)";
+    // Lush garden grass floor
+    ctx.fillStyle = "#15803d";
     ctx.fillRect(0, 500, 900, 100);
 
-    ctx.fillStyle = "#f472b6";
-    ctx.fillRect(0, 500, 900, 4);
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(0, 496, 900, 8);
+
+    // Wildflowers on grass
+    const flowerCols = ['#f43f5e', '#fbbf24', '#ffffff', '#ec4899', '#38bdf8'];
+    for (let i = 20; i < 900; i += 35) {
+      ctx.fillStyle = flowerCols[(i * 7) % flowerCols.length];
+      ctx.beginPath();
+      ctx.arc(i, 498, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  // Draw radiant golden sun with warm rays
+  const drawSun = (ctx, x, y, time) => {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Sunrays
+    ctx.save();
+    ctx.rotate((time / 1000) * 0.15);
+    ctx.fillStyle = 'rgba(253, 224, 71, 0.22)';
+    for (let i = 0; i < 12; i++) {
+      ctx.rotate(Math.PI / 6);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-18, 110);
+      ctx.lineTo(18, 110);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Outer warm halo
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.38)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 62 + Math.sin(time / 200) * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core golden sun
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.7)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 44, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fde047';
+    ctx.beginPath();
+    ctx.arc(0, 0, 36, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Little sparkles around sun
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(12, -12, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  };
+
+  // Draw soft drifting white clouds
+  const drawCloud = (ctx, cx, cy, scale) => {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 26, 0, Math.PI * 2);
+    ctx.arc(24, -6, 20, 0, Math.PI * 2);
+    ctx.arc(-22, -3, 18, 0, Math.PI * 2);
+    ctx.arc(42, 5, 16, 0, Math.PI * 2);
+    ctx.arc(-38, 6, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+
+  // Draw rich garden earth platform topped with thick grass & blooming wildflowers
+  const drawGardenPlatform = (ctx, plat) => {
+    // Rich fertile soil
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+
+    // Soil texture / pebble specks
+    ctx.fillStyle = "rgba(120, 53, 15, 0.5)";
+    ctx.fillRect(plat.x, plat.y + 12, plat.w, plat.h - 12);
+
+    // Thick vibrant green lawn grass
+    ctx.fillStyle = "#15803d";
+    ctx.fillRect(plat.x, plat.y, plat.w, 8);
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(plat.x, plat.y, plat.w, 5);
+
+    // Blooming wildflowers sprouting along the platform grass
+    const step = 28;
+    const colors = ['#f43f5e', '#fbbf24', '#ffffff', '#ec4899', '#38bdf8'];
+    for (let fx = plat.x + 8; fx < plat.x + plat.w - 6; fx += step) {
+      const col = colors[Math.floor((fx * 13) % colors.length)];
+      // Small green leaf
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.ellipse(fx - 2, plat.y - 1, 3, 1.5, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flower blossom
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.arc(fx, plat.y - 3, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(fx, plat.y - 3, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
   };
 
   useEffect(() => {
@@ -305,19 +528,38 @@ export function GameCanvas() {
     const ctx = canvas.getContext('2d');
     let animId;
 
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * 900,
-      y: Math.random() * 600,
-      size: Math.random() * 2.5 + 1,
-      speedY: Math.random() * 0.3 + 0.1,
-      alpha: Math.random()
-    }));
+    // Drifting flower petals & gentle butterflies
+    const petals = Array.from({ length: 35 }, () => {
+      const colors = ['#f472b6', '#fb7185', '#fbbf24', '#ffffff', '#f43f5e', '#c084fc'];
+      return {
+        x: Math.random() * 900,
+        y: Math.random() * 600,
+        size: Math.random() * 5 + 4,
+        speedY: Math.random() * 0.7 + 0.3,
+        speedX: Math.random() * 0.5 - 0.25,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.05,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        swaySpeed: Math.random() * 0.02 + 0.01,
+        swayAmp: Math.random() * 1.5 + 0.5,
+        phase: Math.random() * Math.PI * 2
+      };
+    });
+
+    // 4 playful fluttering butterflies
+    const butterflies = [
+      { x: 120, y: 220, vx: 0.8, vy: 0.3, color: '#f472b6', flap: 0 },
+      { x: 380, y: 160, vx: -0.6, vy: 0.4, color: '#38bdf8', flap: 1 },
+      { x: 620, y: 260, vx: 0.7, vy: -0.3, color: '#fbbf24', flap: 2 },
+      { x: 800, y: 190, vx: -0.5, vy: -0.4, color: '#c084fc', flap: 3 }
+    ];
 
     const render = () => {
+      const now = Date.now();
       const p = player.current;
       const lvl = levels[currentLevel];
 
-      if (gameState === 'PLAYING' && currentLevel !== 2 && currentLevel !== 5 && !isPaused && !showLevel1Puzzle) {
+      if (gameState === 'PLAYING' && currentLevel !== 1 && currentLevel !== 2 && currentLevel !== 5 && !isPaused) {
         const speed = 4;
         if (keys.current.left) {
           p.vx = -speed;
@@ -366,10 +608,11 @@ export function GameCanvas() {
         }
 
         const isEnvelopeCollected = collectedEnvelopes.includes(currentLevel);
+        const isLevel3Unlocked = currentLevel !== 3 || flowers.current.every(f => f.active);
 
-        if (currentLevel !== 1 && lvl.envelope && !isEnvelopeCollected && currentLevel !== 3) {
+        if (lvl.envelope && !isEnvelopeCollected && isLevel3Unlocked) {
           const dist = Math.hypot((p.x + 16) - lvl.envelope.x, (p.y + 24) - lvl.envelope.y);
-          if (dist < 35) {
+          if (dist < 45) {
             collectEnvelope(currentLevel);
           }
         }
@@ -389,7 +632,7 @@ export function GameCanvas() {
               p.vx = 0;
               p.vy = 0;
             } else {
-              triggerDialogue("You must collect the memory letter before advancing through the portal!");
+              triggerDialogue("You must collect the garden memory letter before moving to the next petal path! 🌸");
             }
           }
         }
@@ -402,115 +645,336 @@ export function GameCanvas() {
         }
       }
 
-      ctx.fillStyle = lvl.bgColor;
+      // 1. Radiant Sunny Sky Gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 520);
+      skyGrad.addColorStop(0, lvl.skyTop || '#38bdf8');
+      skyGrad.addColorStop(1, lvl.skyBottom || '#fef08a');
+      ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, 900, 600);
 
-      ctx.fillStyle = "#ffffff";
-      particles.forEach(pt => {
-        ctx.globalAlpha = pt.alpha;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-        ctx.fill();
-        pt.y -= pt.speedY;
-        if (pt.y < 0) pt.y = 600;
-      });
-      ctx.globalAlpha = 1.0;
+      // 2. Radiant Golden Sun
+      drawSun(ctx, 770, 90, now);
 
-      ctx.fillStyle = "rgba(254, 243, 199, 0.15)";
+      // 3. Drifting Fluffy White Clouds
+      const cloudTime = now / 40;
+      drawCloud(ctx, (cloudTime * 0.4 + 60) % 1050 - 100, 75, 1.0);
+      drawCloud(ctx, (cloudTime * 0.25 + 350) % 1050 - 100, 120, 0.75);
+      drawCloud(ctx, (cloudTime * 0.35 + 720) % 1050 - 100, 65, 0.9);
+
+      // 4. Distant Rolling Green Garden Hills
+      ctx.fillStyle = '#86efac';
       ctx.beginPath();
-      ctx.arc(780, 100, 60, 0, Math.PI * 2);
+      ctx.arc(150, 650, 320, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.font = "900 32px serif";
+      ctx.fillStyle = '#4ade80';
+      ctx.beginPath();
+      ctx.arc(520, 680, 360, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(820, 690, 310, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5. Level Name Banner (Crisp Garden Banner)
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.font = "900 28px serif";
       ctx.textAlign = "center";
-      ctx.fillText(lvl.name.toUpperCase(), 450, 80);
+      ctx.fillText(lvl.name.toUpperCase(), 450, 75);
       ctx.textAlign = "left";
 
+      // 6. Floating Flower Petals
+      petals.forEach(pt => {
+        pt.phase += pt.swaySpeed;
+        pt.y += pt.speedY;
+        pt.x += pt.speedX + Math.sin(pt.phase) * pt.swayAmp;
+        pt.rot += pt.rotSpeed;
+
+        if (pt.y > 600) {
+          pt.y = -20;
+          pt.x = Math.random() * 900;
+        }
+
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+        ctx.rotate(pt.rot);
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, pt.size, pt.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // 7. Fluttering Butterflies
+      butterflies.forEach(b => {
+        b.x += b.vx;
+        b.y += b.vy;
+        b.flap += 0.25;
+
+        if (b.x < 30 || b.x > 870) b.vx *= -1;
+        if (b.y < 100 || b.y > 380) b.vy *= -1;
+
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        if (b.vx < 0) ctx.scale(-1, 1);
+        const wingScale = Math.sin(b.flap);
+
+        ctx.fillStyle = b.color;
+        // Upper wing
+        ctx.beginPath();
+        ctx.ellipse(3, -5, 8 * Math.abs(wingScale), 5, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        // Lower wing
+        ctx.beginPath();
+        ctx.ellipse(3, 4, 6 * Math.abs(wingScale), 3.5, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Butterfly body
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-1, -7, 2, 14);
+        ctx.restore();
+      });
+
+      // 8. Level 5: The Royal Rose Garden Hedge Maze
       if (currentLevel === 5 && gameState === 'PLAYING') {
         const cell = 100;
         for (let row = 0; row < 6; row++) {
           for (let col = 0; col < 9; col++) {
             const blocked = maze[row][col] === 1;
-            ctx.fillStyle = blocked ? "#31204f" : "rgba(196, 181, 253, 0.08)";
-            ctx.fillRect(col * cell + 2, row * cell + 2, cell - 4, cell - 4);
-            ctx.strokeStyle = blocked ? "#a855f7" : "rgba(251, 191, 36, 0.25)";
-            ctx.strokeRect(col * cell + 2, row * cell + 2, cell - 4, cell - 4);
+            const cx = col * cell + 2;
+            const cy = row * cell + 2;
+            const cw = cell - 4;
+            const ch = cell - 4;
+
+            if (blocked) {
+              // Lush Green Rose Hedge
+              ctx.fillStyle = "#15803d";
+              ctx.fillRect(cx, cy, cw, ch);
+              ctx.strokeStyle = "#166534";
+              ctx.lineWidth = 3;
+              ctx.strokeRect(cx, cy, cw, ch);
+
+              // Roses blooming on the hedge
+              const roseX = [cx + 25, cx + 70, cx + 45];
+              const roseY = [cy + 25, cy + 35, cy + 70];
+              const roseCols = ['#f43f5e', '#fb7185', '#e11d48'];
+              roseX.forEach((rx, ri) => {
+                ctx.fillStyle = roseCols[ri];
+                ctx.beginPath();
+                ctx.arc(rx, roseY[ri], 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fbcfe8';
+                ctx.beginPath();
+                ctx.arc(rx - 2, roseY[ri] - 2, 3, 0, Math.PI * 2);
+                ctx.fill();
+              });
+            } else {
+              // Sunny Cobblestone Garden Path
+              ctx.fillStyle = "rgba(254, 243, 199, 0.65)";
+              ctx.fillRect(cx, cy, cw, ch);
+              ctx.strokeStyle = "rgba(245, 158, 11, 0.3)";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(cx, cy, cw, ch);
+            }
           }
         }
-        ctx.fillStyle = "#fbbf24";
+
+        // Start Banner
+        ctx.fillStyle = "#b45309";
         ctx.font = "bold 15px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("START", 50, 575);
-        ctx.fillText("LETTER + PRINCESS", 800, 25);
+        ctx.fillText("START 🌸", 50, 575);
+
+        // Destination Pavilion Banner
+        ctx.fillText("FLOWER PAVILION 👑", 800, 25);
         ctx.textAlign = "left";
+
+        // Love Letter at Pavilion
         ctx.fillStyle = "#fef3c7";
         ctx.fillRect(812, 38, 28, 20);
-        ctx.strokeStyle = "#92400e";
+        ctx.strokeStyle = "#d97706";
+        ctx.lineWidth = 2;
         ctx.strokeRect(812, 38, 28, 20);
-        ctx.fillStyle = "#f472b6";
+        ctx.fillStyle = "#f43f5e";
         ctx.beginPath();
-        ctx.arc(850, 75, 15, 0, Math.PI * 2);
+        ctx.arc(826, 48, 4, 0, Math.PI * 2);
         ctx.fill();
+
+        // Princess waiting at Rose Pavilion
         drawPrincess(ctx, 830, 48);
       }
 
+      // Dance Scene
       if (gameState === 'DANCE') {
         drawPersonalizedBackground(ctx);
       }
 
-      if (currentLevel !== 5) lvl.platforms.forEach(plat => {
-        ctx.fillStyle = "#1e1b4b";
-        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-        ctx.fillStyle = "#a855f7";
-        ctx.fillRect(plat.x, plat.y, plat.w, 4);
-      });
-
-      if (currentLevel === 3) {
-        crystals.current.forEach(c => {
-          ctx.fillStyle = c.active ? "#38bdf8" : "#475569";
-          ctx.beginPath();
-          ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "#e0f2fe";
-          ctx.stroke();
+      // Platforms (Lush Garden Earth & Grass)
+      if (currentLevel !== 5) {
+        lvl.platforms.forEach(plat => {
+          drawGardenPlatform(ctx, plat);
         });
       }
 
+      // Level 3 Enchanted Blooming Flowers
+      if (currentLevel === 3) {
+        flowers.current.forEach(f => {
+          const dist = Math.hypot((p.x + 16) - f.x, (p.y + 24) - f.y);
+          const isNear = dist < 60;
+
+          ctx.save();
+          ctx.translate(f.x, f.y);
+
+          // Green plant stem
+          ctx.strokeStyle = "#16a34a";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(0, 18);
+          ctx.quadraticCurveTo(f.active ? -6 : 6, 8, 0, 0);
+          ctx.stroke();
+
+          // Green leaves
+          ctx.fillStyle = "#22c55e";
+          ctx.beginPath();
+          ctx.ellipse(-8, 10, 7, 3, -0.4, 0, Math.PI * 2);
+          ctx.ellipse(8, 12, 7, 3, 0.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (f.active) {
+            // Blooming state: Glowing floral aura
+            ctx.fillStyle = "rgba(254, 240, 138, 0.45)";
+            ctx.beginPath();
+            ctx.arc(0, 0, 22 + Math.sin(now / 150) * 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Flower Petals
+            ctx.fillStyle = f.petalColor;
+            for (let petal = 0; petal < 8; petal++) {
+              const angle = (petal * Math.PI) / 4;
+              ctx.beginPath();
+              ctx.arc(Math.cos(angle) * 12, Math.sin(angle) * 12, 7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Flower Center
+            ctx.fillStyle = f.centerColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sparkle pollen
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(Math.sin(now / 180) * 6, -14 - Math.abs(Math.sin(now / 200) * 8), 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // Unbloomed bud state
+            ctx.fillStyle = "#15803d";
+            ctx.beginPath();
+            ctx.arc(0, 4, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = f.petalColor;
+            ctx.beginPath();
+            ctx.arc(0, -2, 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Floating helper label when nearby
+          if (isNear && !f.active) {
+            ctx.fillStyle = "#92400e";
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Press E to Bloom 🌸", 0, -26);
+          } else if (isNear && f.active) {
+            ctx.fillStyle = "#15803d";
+            ctx.font = "bold 12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Bloomed! ✨", 0, -26);
+          }
+
+          ctx.restore();
+        });
+      }
+
+      // Garden Flower Arch / Portal
       if (lvl.nextPortal) {
         const canPass = collectedEnvelopes.includes(currentLevel);
-        ctx.fillStyle = canPass ? "rgba(244, 114, 182, 0.3)" : "rgba(100, 116, 139, 0.2)";
-        ctx.fillRect(lvl.nextPortal.x, lvl.nextPortal.y, lvl.nextPortal.w, lvl.nextPortal.h);
-        ctx.strokeStyle = canPass ? "#f472b6" : "#64748b";
-        ctx.strokeRect(lvl.nextPortal.x, lvl.nextPortal.y, lvl.nextPortal.w, lvl.nextPortal.h);
+        const port = lvl.nextPortal;
+
+        ctx.save();
+        ctx.translate(port.x, port.y);
+
+        // Floral arch frame
+        ctx.fillStyle = canPass ? "rgba(244, 114, 182, 0.35)" : "rgba(251, 191, 36, 0.2)";
+        ctx.fillRect(0, 0, port.w, port.h);
+        ctx.strokeStyle = canPass ? "#f43f5e" : "#d97706";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, port.w, port.h);
+
+        // Roses on portal top
+        ctx.fillStyle = canPass ? "#f43f5e" : "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(port.w / 2, -6, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(canPass ? "PORTAL 🌸" : "LOCKED", port.w / 2, -14);
+
+        ctx.restore();
       }
 
       const isCollected = collectedEnvelopes.includes(currentLevel);
-      const puzzleLockedDraw = currentLevel === 3 && !crystals.current.every(c => c.active);
+      const allFlowersActive = currentLevel !== 3 || flowers.current.every(f => f.active);
+      const puzzleLockedDraw = currentLevel === 3 && !allFlowersActive;
 
+      // Sealed / Blooming Love Letter Envelope
       if (currentLevel !== 5 && lvl.envelope && !isCollected) {
         ctx.save();
-        ctx.translate(lvl.envelope.x, lvl.envelope.y + Math.sin(Date.now() / 200) * 4);
-        ctx.fillStyle = puzzleLockedDraw ? "rgba(148, 163, 184, 0.3)" : "rgba(251, 191, 36, 0.4)";
+        ctx.translate(lvl.envelope.x, lvl.envelope.y + Math.sin(now / 200) * 4);
+
+        // Soft halo
+        ctx.fillStyle = puzzleLockedDraw ? "rgba(203, 213, 225, 0.5)" : "rgba(254, 240, 138, 0.6)";
         ctx.beginPath();
-        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = puzzleLockedDraw ? "#94a3b8" : "#fbbf24";
-        ctx.fillRect(-12, -8, 24, 16);
-        ctx.strokeStyle = "#78350f";
-        ctx.strokeRect(-12, -8, 24, 16);
+        // Envelope Body
+        ctx.fillStyle = puzzleLockedDraw ? "#e2e8f0" : "#fef08a";
+        ctx.fillRect(-14, -10, 28, 20);
+        ctx.strokeStyle = puzzleLockedDraw ? "#94a3b8" : "#d97706";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-14, -10, 28, 20);
+
+        // Flap
         ctx.beginPath();
-        ctx.moveTo(-12, -8);
-        ctx.lineTo(0, 1);
-        ctx.lineTo(12, -8);
+        ctx.moveTo(-14, -10);
+        ctx.lineTo(0, 2);
+        ctx.lineTo(14, -10);
         ctx.stroke();
 
-        if (currentLevel === 1) {
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "12px sans-serif";
+        // Flower seal in center
+        ctx.fillStyle = puzzleLockedDraw ? "#94a3b8" : "#f43f5e";
+        ctx.beginPath();
+        ctx.arc(0, 2, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label above envelope in Level 3
+        if (currentLevel === 3) {
           ctx.textAlign = "center";
-          ctx.fillText("Press E / Tap to Solve Jigsaw", 0, -26);
+          if (puzzleLockedDraw) {
+            const activeCount = flowers.current.filter(f => f.active).length;
+            ctx.fillStyle = "#78350f";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText(`🔒 Bloom Flowers (${activeCount}/3)`, 0, -22);
+          } else {
+            ctx.fillStyle = "#be185d";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText("🌸 Letter Unlocked!", 0, -22);
+          }
         }
 
         ctx.restore();
@@ -520,6 +984,7 @@ export function GameCanvas() {
         drawPrince(ctx, p.x, p.y, p.facing, p.animFrame);
       }
 
+      // Joyful Garden Reunion Dance Scene
       if (gameState === 'DANCE') {
         const targetX = princess.current.x - 45;
 
@@ -530,15 +995,19 @@ export function GameCanvas() {
           drawPrince(ctx, p.x, 450, p.facing, p.animFrame);
           drawPrincess(ctx, princess.current.x, 450);
         } else {
-          const bounceY = Math.abs(Math.sin(Date.now() / 150)) * -12;
-          const princeBounce = Math.abs(Math.cos(Date.now() / 150)) * -12;
+          const bounceY = Math.abs(Math.sin(now / 150)) * -12;
+          const princeBounce = Math.abs(Math.cos(now / 150)) * -12;
 
           drawPrince(ctx, p.x, 450, 'right', 1, princeBounce);
           drawPrincess(ctx, princess.current.x, 450, bounceY);
 
+          // Glowing Hearts
           ctx.fillStyle = "#f43f5e";
-          ctx.font = "20px sans-serif";
-          ctx.fillText("♥", p.x + 20, 420 + Math.sin(Date.now() / 200) * 8);
+          ctx.font = "24px sans-serif";
+          ctx.fillText("♥", p.x + 20, 415 + Math.sin(now / 200) * 8);
+          ctx.fillStyle = "#fbbf24";
+          ctx.font = "18px sans-serif";
+          ctx.fillText("🌸", p.x + 36, 400 + Math.cos(now / 200) * 6);
 
           if (!danceTransitionScheduled.current) {
             danceTransitionScheduled.current = true;
@@ -548,12 +1017,19 @@ export function GameCanvas() {
           }
         }
 
+        // Celebration Petals & Floral Confetti Shower
         confettiList.current.forEach(c => {
           ctx.save();
           ctx.translate(c.x, c.y);
           ctx.rotate(c.rot);
           ctx.fillStyle = c.color;
-          ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+          if (c.isPetal) {
+            ctx.beginPath();
+            ctx.ellipse(0, 0, c.w, c.h, 0, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+          }
           ctx.restore();
 
           c.y += c.speedY;
@@ -572,7 +1048,7 @@ export function GameCanvas() {
 
     render();
     return () => cancelAnimationFrame(animId);
-  }, [gameState, currentLevel, collectedEnvelopes, isPaused, showLevel1Puzzle]);
+  }, [gameState, currentLevel, collectedEnvelopes, isPaused]);
 
   return (
     <div className="relative w-full h-full">
@@ -580,21 +1056,9 @@ export function GameCanvas() {
         ref={canvasRef}
         width={900}
         height={600}
-        className="w-full h-full object-contain block bg-slate-950"
+        onClick={handleCanvasClick}
+        className="w-full h-full block"
       />
-
-      {/* DEDICATED LEVEL 1 JIGSAW PUZZLE COMPONENT */}
-      {showLevel1Puzzle && (
-        <Level1Puzzle
-          onSolve={() => {
-            audio.playGateSFX();
-            collectEnvelope(1);
-            setShowLevel1Puzzle(false);
-            triggerDialogue("Wonderful! The 16-piece jigsaw memory is restored and Letter 1 is unlocked!");
-          }}
-          onClose={() => setShowLevel1Puzzle(false)}
-        />
-      )}
     </div>
   );
 }
