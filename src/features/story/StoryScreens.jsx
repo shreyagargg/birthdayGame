@@ -97,7 +97,7 @@ export function HomeScreen() {
         <div className="relative">
           <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 via-pink-400 to-rose-400 blur opacity-50 animate-pulse"></div>
           <span className="relative text-xs tracking-widest text-amber-900 font-bold uppercase px-4 py-1.5 bg-white/95 rounded-full border border-amber-300 shadow-sm flex items-center gap-1.5">
-            <span>☀️</span> A Sunlit Garden Fairytale <span>🌸</span>
+            <span>☀️</span> Ray: Our Story <span>🌸</span>
           </span>
         </div>
 
@@ -157,7 +157,7 @@ export function RevealSequence() {
       setIdx(prev => prev + 1);
       audio.playTone(500, 'sine', 0.15, 0.1);
     } else {
-      setGameState('ENDING');
+      setGameState('SURPRISE');
     }
   };
 
@@ -197,7 +197,7 @@ export function RevealSequence() {
             onClick={handleNext}
             className="px-5 py-2.5 bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 hover:brightness-105 text-white rounded-xl font-bold text-xs transition shadow-md shadow-pink-500/20 flex items-center space-x-1"
           >
-            <span>{idx === 4 ? "Complete Garden Story 🌸" : "Next Memory 🌻"}</span>
+            <span>{idx === 4 ? "Open Grand Surprise! 🎁✨" : "Next Memory 🌻"}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

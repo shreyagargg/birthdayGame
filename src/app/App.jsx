@@ -7,6 +7,7 @@ import { Level1Puzzle } from '../features/game/Level1Puzzle';
 import { LevelTwoQuiz } from '../features/quiz/LevelTwoQuiz';
 import { HUDOverlay, DialogueBox, HomeScreen, RevealSequence } from '../features/story/StoryScreens';
 import { EndingOverlay, NextChapterPreview } from '../features/story/EndingScreens';
+import { SurpriseScreen } from '../features/story/SurpriseScreen';
 import { JournalModal, HowToPlayModal, PauseModal } from '../features/story/UtilityModals';
 
 const safeStorage = {
@@ -161,6 +162,7 @@ function App() {
         {isPaused && <PauseModal />}
         {gameState === 'REVEAL' && <RevealSequence />}
         {gameState === 'ENDING' && <EndingOverlay />}
+        {gameState === 'SURPRISE' && <SurpriseScreen />}
         {gameState === 'PREVIEW' && <NextChapterPreview />}
       </div>
     </GameContext.Provider>

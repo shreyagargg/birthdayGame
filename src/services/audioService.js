@@ -57,6 +57,35 @@ class SynthesizerAudio {
     setTimeout(() => this.playTone(440, 'sine', 1.0, 0.2), 300);
   }
 
+  playCrackerSFX() {
+    if (!this.init()) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    // Low pop followed by quick crackles
+    this.playTone(180, 'triangle', 0.12, 0.15);
+    setTimeout(() => this.playTone(720 + Math.random() * 300, 'square', 0.05, 0.04), 40);
+    setTimeout(() => this.playTone(880 + Math.random() * 400, 'square', 0.06, 0.05), 80);
+    setTimeout(() => this.playTone(1050 + Math.random() * 500, 'sine', 0.08, 0.04), 130);
+  }
+
+  playCardFlipSFX() {
+    if (!this.init()) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    // Ascending sparkle arpeggio
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, i) => {
+      setTimeout(() => this.playTone(freq, 'sine', 0.22, 0.18), i * 65);
+    });
+  }
+
+  playGrandFanfareSFX() {
+    if (!this.init()) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    const fanfare = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    fanfare.forEach((freq, i) => {
+      setTimeout(() => this.playTone(freq, 'triangle', 0.35, 0.2), i * 110);
+    });
+  }
+
   startMusic() {
     if (!this.init()) return;
     if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});

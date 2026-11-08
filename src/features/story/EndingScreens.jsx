@@ -27,8 +27,15 @@ export function EndingOverlay() {
 
         <div className="flex flex-col w-full space-y-3 pt-2">
           <button
+            onClick={() => setGameState('SURPRISE')}
+            className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 hover:brightness-110 text-white font-black rounded-2xl shadow-xl shadow-pink-500/30 transition text-base flex items-center justify-center space-x-2 animate-pulse"
+          >
+            <span>Open Grand Surprises! 🎁🎆</span>
+          </button>
+
+          <button
             onClick={relive}
-            className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 hover:brightness-105 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/25 transition text-sm flex items-center justify-center space-x-2"
+            className="w-full py-3 bg-white/10 hover:bg-white/20 text-amber-900 border border-amber-300 font-bold rounded-2xl transition text-sm flex items-center justify-center space-x-2"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Relive the Garden Adventure 🌻</span>
