@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { GameContext } from '../../shared/GameContext';
 import { audio } from '../../services/audioService';
 
-const GARDEN_IMAGE_URL = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=600&q=80";
+const GARDEN_IMAGE_URL = "../../../assets/icon.png";
 
 // Procedural sunlit flower garden artwork
 function createProceduralFallbackCanvas() {

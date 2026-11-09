@@ -34,7 +34,7 @@ export function LevelTwoQuiz() {
     if (!selectedOption || !question) return;
     if (selectedOption === question.answer) {
       audio.playCollectSFX();
-      setQuizFeedback("Correct! One more sweet bloom in our love story. 🌸💗");
+      setQuizFeedback("Ohhoo !! Mithu kya baat h");
       if (quizIndex === LOVE_QUIZ.length - 1) {
         setQuizComplete(true);
         if (!collectedEnvelopes.includes(2)) collectEnvelope(2);
@@ -43,7 +43,7 @@ export function LevelTwoQuiz() {
       }
       setSelectedOption("");
     } else {
-      setQuizFeedback("Not quite! Take a breath, prince. You know our story. 💌");
+      setQuizFeedback("Harami!! dhang se yaad kar chomu");
       audio.playTone(220, "sine", 0.2, 0.08);
     }
   };
@@ -59,7 +59,7 @@ export function LevelTwoQuiz() {
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-amber-950/25 backdrop-blur-sm p-4 pt-16">
       <div className="w-full max-w-xl rounded-3xl border-2 border-amber-300/90 bg-[#fffef9]/95 backdrop-blur-md p-6 md:p-8 text-center shadow-2xl text-amber-950">
         <div className="mb-2 text-3xl">🌻 💌 ☀️</div>
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-700">Level 2 · The Sunflower Memories Quiz</p>
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-700">Level 2 · Sawal Jawab</p>
         {quizComplete ? (
           <>
             <h2 className="mt-3 text-2xl md:text-3xl font-serif font-bold text-amber-900">Letter No. 2 Unlocked! 🌻</h2>

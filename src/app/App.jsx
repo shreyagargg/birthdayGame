@@ -19,32 +19,9 @@ const safeStorage = {
   }
 };
 
-function readConfig(raw) {
-  try {
-    const value = raw ? JSON.parse(raw) : null;
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return DEFAULT_CONFIG;
-    return Object.fromEntries(Object.entries(DEFAULT_CONFIG).map(([key, fallback]) => [
-      key, typeof value[key] === 'string' ? value[key] : fallback
-    ]));
-  } catch {
-    return DEFAULT_CONFIG;
-  }
-}
-
-function readNotes(raw) {
-  try {
-    const value = raw ? JSON.parse(raw) : null;
-    if (!Array.isArray(value) || value.length !== 5) return DEFAULT_NOTES;
-    const valid = value.every((note) => note && typeof note.title === 'string' && typeof note.text === 'string');
-    return valid ? value.map((note, index) => ({ id: index + 1, title: note.title, text: note.text })) : DEFAULT_NOTES;
-  } catch {
-    return DEFAULT_NOTES;
-  }
-}
-
 function App() {
-  const [config, setConfig] = useState(() => readConfig(safeStorage.get('fairytale_react_cfg')));
-  const [notes, setNotes] = useState(() => readNotes(safeStorage.get('fairytale_react_notes')));
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [notes, setNotes] = useState(DEFAULT_NOTES);
   const [gameState, setGameState] = useState('HOME');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [collectedEnvelopes, setCollectedEnvelopes] = useState([]);
@@ -58,13 +35,15 @@ function App() {
   const [showConfig, setShowConfig] = useState(false);
   const [dialogue, setDialogue] = useState(null);
 
+  // Clear stale cached notes/config from previous sessions so DEFAULT_NOTES from gameConfig.js always displays
   useEffect(() => {
-    safeStorage.set('fairytale_react_cfg', JSON.stringify(config));
-  }, [config]);
-
-  useEffect(() => {
-    safeStorage.set('fairytale_react_notes', JSON.stringify(notes));
-  }, [notes]);
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('fairytale_react_notes');
+        window.localStorage.removeItem('fairytale_react_cfg');
+      }
+    } catch (e) {}
+  }, []);
 
   useEffect(() => {
     try {

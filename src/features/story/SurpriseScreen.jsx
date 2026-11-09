@@ -1,30 +1,18 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { Sparkles, Camera, RotateCcw, Heart, Gift, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { Sparkles, Camera, RotateCcw, CheckCircle2, X } from 'lucide-react';
 import { GameContext } from '../../shared/GameContext';
 import { DEFAULT_GIFTS } from '../../shared/gameConfig';
 import { audio } from '../../services/audioService';
 
-const FALLBACK_GIFTS = [
-  { id: 1, icon: "☕", title: "Cozy Coffee & Date Night", tag: "Romantic", desc: "Dinner & drinks at your favorite spot, plus cozy bookstore coffee — entirely on me! 💕" },
-  { id: 2, icon: "💆‍♂️", title: "Ultimate Relaxation Pass", tag: "Pampering", desc: "A long soothing head massage, shoulder rub, and pure relaxation with zero rush. 💤" },
-  { id: 3, icon: "🎬", title: "Movie Marathon Night", tag: "Entertainment", desc: "You choose any movie or series, unlimited popcorn and favorite snacks delivered! 🍿" },
-  { id: 4, icon: "🍳", title: "Special Home-Cooked Feast", tag: "Foodie", desc: "I will make your absolute favorite meal from scratch with love and your favorite dessert. 🍝✨" },
-  { id: 5, icon: "🏖️", title: "Spontaneous Road Trip", tag: "Adventure", desc: "A scenic long drive, beach day, or spontaneous weekend getaway planned by me! 🚗🌅" },
-  { id: 6, icon: "🎮", title: "Uninterrupted Game Day", tag: "Free Pass", desc: "A full day of guilt-free gaming with snacks & drinks brought right to your setup. ⚡🎮" },
-  { id: 7, icon: "🎟️", title: "Win Any Argument Pass", tag: "Special Perk", desc: "Play this card anytime to automatically win any silly debate! (Valid 1x use) 🏆😄" },
-  { id: 8, icon: "🍦", title: "Late-Night Dessert Run", tag: "Sweet Treat", desc: "A spontaneous late-night drive to get your favorite ice cream, waffles or sweets. 🌙🍧" },
-  { id: 9, icon: "✨", title: "The Mystery Wish Voucher", tag: "Golden Ticket", desc: "Redeemable for any realistic wish or favor of your choice, no questions asked! 💖🌟" }
-];
-
 export function SurpriseScreen() {
-  const { config, setGameState, resetProgress } = useContext(GameContext);
+  const { config, resetProgress } = useContext(GameContext);
   const canvasRef = useRef(null);
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [activeModalGift, setActiveModalGift] = useState(null);
   const [showDedication, setShowDedication] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
+  const [setShowBanner] = useState(false);
 
   const gifts = (typeof DEFAULT_GIFTS !== 'undefined' && Array.isArray(DEFAULT_GIFTS) && DEFAULT_GIFTS.length === 9)
     ? DEFAULT_GIFTS
@@ -139,7 +127,7 @@ export function SurpriseScreen() {
         const r = fw.rockets[i];
         r.x += r.vx;
         r.y += r.vy;
-        r.vy += 0.05; // slight deceleration
+        r.vy += 0.05; 
 
         // Rocket sparkle trail
         ctx.fillStyle = r.color;
@@ -282,7 +270,7 @@ export function SurpriseScreen() {
         </div>
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-serif tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-rose-300 to-pink-400 drop-shadow-[0_4px_24px_rgba(251,191,36,0.5)]">
-          SURPRISE SURPRISE! 🎆🎉
+          SURPRISE SURPRISE! 💝
         </h1>
 
         <p className="mt-2 text-sm sm:text-base md:text-lg font-medium text-amber-100/90 max-w-xl leading-relaxed">
@@ -332,18 +320,23 @@ export function SurpriseScreen() {
           {gifts.map((gift, idx) => {
             const isUnlocked = selectedIds.includes(gift.id);
             const isLockedOut = !isUnlocked && isComplete;
+            let cardStateClass;
+
+            if (isUnlocked) {
+              cardStateClass = 'bg-gradient-to-br from-amber-950/90 via-slate-900/95 to-rose-950/90 border-2 border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.35)] scale-[1.02]';
+            } else if (isLockedOut) {
+              cardStateClass = 'bg-slate-950/50 border border-white/10 opacity-40 cursor-not-allowed';
+            } else {
+              cardStateClass = 'bg-slate-900/70 border-2 border-amber-400/40 hover:border-amber-400 hover:bg-slate-800/80 hover:shadow-[0_0_20px_rgba(251,191,36,0.25)] hover:scale-105 active:scale-95';
+            }
 
             return (
-              <div
+              <button
+                type="button"
                 key={gift.id}
+                disabled={isLockedOut}
                 onClick={(e) => handleCardClick(gift, e)}
-                className={`relative group rounded-2xl p-2.5 sm:p-3.5 md:p-4 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[145px] sm:min-h-[175px] md:min-h-[200px] select-none cursor-pointer ${
-                  isUnlocked
-                    ? 'bg-gradient-to-br from-amber-950/90 via-slate-900/95 to-rose-950/90 border-2 border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.35)] scale-[1.02]'
-                    : isLockedOut
-                    ? 'bg-slate-950/50 border border-white/10 opacity-40 cursor-not-allowed'
-                    : 'bg-slate-900/70 border-2 border-amber-400/40 hover:border-amber-400 hover:bg-slate-800/80 hover:shadow-[0_0_20px_rgba(251,191,36,0.25)] hover:scale-105 active:scale-95'
-                }`}
+                className={`relative group rounded-2xl p-2.5 sm:p-3.5 md:p-4 text-center transition-all duration-300 flex flex-col items-center justify-between min-h-[145px] sm:min-h-[175px] md:min-h-[200px] select-none cursor-pointer ${cardStateClass}`}
               >
                 {/* UNLOCKED CARD STATE */}
                 {isUnlocked ? (
@@ -370,10 +363,6 @@ export function SurpriseScreen() {
                         {gift.desc}
                       </p>
                     </div>
-
-                    <div className="mt-1 text-[9px] sm:text-[10px] text-amber-400/80 font-semibold">
-                      ✨ Tap to expand
-                    </div>
                   </>
                 ) : (
                   /* LOCKED MYSTERY GIFT STATE */
@@ -397,7 +386,7 @@ export function SurpriseScreen() {
                     </div>
                   </>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
@@ -439,8 +428,6 @@ export function SurpriseScreen() {
             onClick={() => setShowDedication(true)}
             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-400/30 transition flex items-center gap-1.5"
           >
-            <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
-            <span>Read Fairytale Dedication 💌</span>
           </button>
 
           <button
@@ -504,22 +491,6 @@ export function SurpriseScreen() {
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold flex items-center justify-center transition"
             >
               ✕
-            </button>
-
-            <div className="text-3xl mb-1">🌸 👑 💕</div>
-            <h3 className="text-2xl font-bold font-serif text-amber-950 mb-3">
-              Our Fairytale Blooms Forever
-            </h3>
-
-            <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-left font-serif text-base leading-relaxed text-amber-900 whitespace-pre-line max-h-60 overflow-y-auto">
-              {config.dedicationText.replaceAll('[SPECIAL NICKNAME]', config.recipientNickname)}
-            </div>
-
-            <button
-              onClick={() => setShowDedication(false)}
-              className="mt-6 w-full py-2.5 rounded-xl bg-amber-800 hover:bg-amber-900 text-amber-50 font-bold text-sm transition shadow"
-            >
-              Back to Surprises 🎁
             </button>
           </div>
         </div>
