@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { GameContext } from '../../shared/GameContext';
 import { audio } from '../../services/audioService';
 
-const GARDEN_IMAGE_URL = "../../../assets/icon.png";
+const GARDEN_IMAGE_URL = "https://drive.google.com/file/d/1vLvirlIUy0HPbighNebBx6ipLYRxm-cA/view?usp=sharing";
 
 // Procedural sunlit flower garden artwork
 function createProceduralFallbackCanvas() {
@@ -209,7 +209,7 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
   const [isSolved, setIsSolved] = useState(() => collectedEnvelopes.includes(1));
   const [imgLoaded, setImgLoaded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [showNumbers, setShowNumbers] = useState(false);
+  // const [showNumbers, setShowNumbers] = useState(false);
 
   const GRID_SIZE = 4; // 4x4 = 16 pieces
   const BOARD_SIZE = 320; // 320x320 px
@@ -418,18 +418,6 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
     }
   };
 
-  // Instant solve helper
-  const handleAutoSolve = () => {
-    const solvedPieces = pieces.map((p) => ({ ...p, currentIndex: p.correctIndex }));
-    setPieces(solvedPieces);
-    setSelectedPiece(null);
-    setIsSolved(true);
-    audio.playGateSFX();
-    if (!collectedEnvelopes.includes(1)) {
-      collectEnvelope(1);
-    }
-  };
-
   const continueToLevelTwo = () => {
     setCurrentLevel(2);
     triggerDialogue("The first garden letter is yours! Now, let's see how well you remember our story in the Sunflower Quiz! 🌻✨");
@@ -514,7 +502,7 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
                 {showPreview ? "👁️ Hide Preview" : "👁️ Preview Target"}
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setShowNumbers(!showNumbers)}
                 className={`px-3 py-1.5 rounded-lg border font-medium transition shadow-sm ${
@@ -524,7 +512,7 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
                 }`}
               >
                 {showNumbers ? "🔢 Hide Numbers" : "🔢 Number Hints"}
-              </button>
+              </button> */}
 
               <button
                 type="button"
@@ -534,13 +522,13 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
                 🔀 Reshuffle
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={handleAutoSolve}
                 className="px-3 py-1.5 rounded-lg border border-pink-300 bg-pink-50 text-pink-700 hover:bg-pink-100 font-medium transition shadow-sm"
               >
                 ✨ Auto-Solve
-              </button>
+              </button> */}
             </div>
 
             {/* Preview Reference Modal / Card */}
