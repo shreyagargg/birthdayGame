@@ -2,7 +2,7 @@ import { useEffect, useRef, useContext } from 'react';
 import { GameContext } from '../../shared/GameContext';
 import { audio } from '../../services/audioService';
 
-const PERSONAL_BACKGROUND_URL = "https://drive.google.com/file/d/1vLvirlIUy0HPbighNebBx6ipLYRxm-cA/view?usp=sharing";
+const PERSONAL_BACKGROUND_URL = "../../assets/icon.png";
 
 export function GameCanvas() {
   const {

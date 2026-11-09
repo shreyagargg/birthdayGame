@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { GameContext } from '../../shared/GameContext';
 import { audio } from '../../services/audioService';
 
-const GARDEN_IMAGE_URL = "https://drive.google.com/file/d/1vLvirlIUy0HPbighNebBx6ipLYRxm-cA/view?usp=sharing";
+const GARDEN_IMAGE_URL = "../../assets/icon.png";
 
 // Procedural sunlit flower garden artwork
 function createProceduralFallbackCanvas() {
@@ -338,18 +338,18 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
       }
 
       // Numbers guide if enabled
-      if (showNumbers) {
-        ctx.fillStyle = "rgba(254, 240, 138, 0.9)";
-        ctx.fillRect(destX + 3, destY + 3, 20, 16);
-        ctx.strokeStyle = "#b45309";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(destX + 3, destY + 3, 20, 16);
-        ctx.fillStyle = "#78350f";
-        ctx.font = "bold 11px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(String(piece.correctIndex + 1), destX + 13, destY + 11);
-      }
+      // if (showNumbers) {
+      //   ctx.fillStyle = "rgba(254, 240, 138, 0.9)";
+      //   ctx.fillRect(destX + 3, destY + 3, 20, 16);
+      //   ctx.strokeStyle = "#b45309";
+      //   ctx.lineWidth = 1;
+      //   ctx.strokeRect(destX + 3, destY + 3, 20, 16);
+      //   ctx.fillStyle = "#78350f";
+      //   ctx.font = "bold 11px sans-serif";
+      //   ctx.textAlign = "center";
+      //   ctx.textBaseline = "middle";
+      //   ctx.fillText(String(piece.correctIndex + 1), destX + 13, destY + 11);
+      // }
 
       // Selected piece highlight (warm sunny glow)
       if (selectedPiece === piece.currentIndex) {
@@ -362,7 +362,7 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
 
       ctx.restore();
     });
-  }, [pieces, selectedPiece, imgLoaded, isSolved, showNumbers, PIECE_SIZE, GRID_SIZE]);
+  }, [pieces, selectedPiece, imgLoaded, isSolved, PIECE_SIZE, GRID_SIZE]);
 
   // Render completed image on solved canvas
   useEffect(() => {
@@ -501,19 +501,6 @@ export function Level1Puzzle({ imageUrl = GARDEN_IMAGE_URL }) {
               >
                 {showPreview ? "👁️ Hide Preview" : "👁️ Preview Target"}
               </button>
-
-              {/* <button
-                type="button"
-                onClick={() => setShowNumbers(!showNumbers)}
-                className={`px-3 py-1.5 rounded-lg border font-medium transition shadow-sm ${
-                  showNumbers
-                    ? 'border-amber-400 bg-amber-200 text-amber-900 font-bold'
-                    : 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                }`}
-              >
-                {showNumbers ? "🔢 Hide Numbers" : "🔢 Number Hints"}
-              </button> */}
-
               <button
                 type="button"
                 onClick={initPuzzle}
